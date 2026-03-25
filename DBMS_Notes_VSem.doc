@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8">
+<style>
+body{font-family:Calibri,sans-serif;font-size:11pt;color:#1a1a1a;margin:1in;}
+h1{font-size:20pt;font-weight:bold;color:#1e1b4b;text-align:center;margin-bottom:6pt;}
+h2{font-size:14pt;font-weight:bold;color:#4f46e5;background:#eef2ff;padding:5pt 8pt;margin-top:18pt;margin-bottom:6pt;border-left:4pt solid #4f46e5;}
+h3{font-size:12pt;font-weight:bold;color:#374151;margin-top:10pt;margin-bottom:4pt;}
+p{font-size:11pt;margin-bottom:6pt;line-height:1.5;}
+ul,ol{margin-left:20pt;margin-bottom:8pt;}
+li{margin-bottom:3pt;font-size:11pt;}
+pre{font-family:"Courier New",monospace;font-size:9pt;background:#1e1b4b;color:#e0e7ff;padding:10pt;margin:8pt 0;white-space:pre-wrap;border-radius:4pt;}
+table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:10pt;}
+th{background:#4f46e5;color:#ffffff;padding:5pt 8pt;text-align:left;font-weight:bold;}
+td{padding:5pt 8pt;border:1pt solid #e5e7eb;}
+tr:nth-child(even) td{background:#f9fafb;}
+.tip{background:#eff6ff;border-left:4pt solid #3b82f6;padding:8pt 12pt;margin:10pt 0;font-size:10pt;color:#1e40af;}
+.center{text-align:center;}
+</style></head>
+<body>
+<h1>Database Management Systems (DBMS)</h1>
+<p class="center" style="color:#6b7280;font-size:10pt;">B.Tech V Semester &mdash; Complete Study Notes</p>
+
+<h2>1. DBMS and Its Applications</h2>
+<p>A <b>Database Management System (DBMS)</b> is software that enables users to create, store, manage, retrieve, and manipulate data in a structured and efficient manner. It acts as an interface between the user and the database.</p>
+<h3>Key Characteristics</h3>
+<ul>
+<li>Data independence (logical and physical)</li>
+<li>Reduced data redundancy and inconsistency</li>
+<li>Concurrent access by multiple users</li>
+<li>Data security and role-based authorization</li>
+<li>Backup and automatic recovery mechanisms</li>
+<li>Data integrity enforcement</li>
+</ul>
+<h3>Applications of DBMS</h3>
+<table><tr><th>Domain</th><th>Application</th><th>Example</th></tr>
+<tr><td>Banking</td><td>Account management, transactions</td><td>Core banking systems</td></tr>
+<tr><td>Airlines</td><td>Reservations, schedules</td><td>IRCTC, booking systems</td></tr>
+<tr><td>Universities</td><td>Student records, grades</td><td>University ERP</td></tr>
+<tr><td>Telecom</td><td>Call records, billing</td><td>Airtel, Jio CRM</td></tr>
+<tr><td>Healthcare</td><td>Patient records</td><td>Hospital Management Systems</td></tr>
+<tr><td>E-commerce</td><td>Products, orders, customers</td><td>Amazon, Flipkart</td></tr></table>
+<h3>DBMS vs File System</h3>
+<table><tr><th>Feature</th><th>File System</th><th>DBMS</th></tr>
+<tr><td>Data redundancy</td><td>High</td><td>Low (controlled)</td></tr>
+<tr><td>Data consistency</td><td>Difficult</td><td>Enforced by DBMS</td></tr>
+<tr><td>Concurrent access</td><td>Not supported</td><td>Full support</td></tr>
+<tr><td>Security</td><td>OS-level only</td><td>Role-based access</td></tr>
+<tr><td>Query</td><td>None</td><td>Powerful SQL</td></tr>
+<tr><td>Recovery</td><td>Manual</td><td>Automatic</td></tr></table>
+
+<h2>2. Integrity</h2>
+<p><b>Data Integrity</b> ensures data is accurate, consistent, and valid throughout its lifecycle.</p>
+<ul>
+<li><b>Entity Integrity:</b> Primary key must be unique and NOT NULL. e.g., Each student has a unique student_id.</li>
+<li><b>Referential Integrity:</b> Foreign key must match a primary key in the referenced table. e.g., Orders cannot reference a non-existent customer.</li>
+<li><b>Domain Integrity:</b> Values must belong to a defined valid set. e.g., age must be 0&ndash;150.</li>
+<li><b>User-Defined Integrity:</b> Business rules beyond standard constraints. e.g., Salary cannot exceed manager's salary.</li>
+</ul>
+
+<h2>3. Constraints</h2>
+<p>Constraints are rules enforced on table columns to ensure accuracy and reliability of data.</p>
+<table><tr><th>Constraint</th><th>Description</th><th>Example</th></tr>
+<tr><td>NOT NULL</td><td>No NULL values allowed</td><td>name VARCHAR(50) NOT NULL</td></tr>
+<tr><td>UNIQUE</td><td>All values must differ</td><td>email VARCHAR(100) UNIQUE</td></tr>
+<tr><td>PRIMARY KEY</td><td>Unique + Not Null row identifier</td><td>student_id INT PRIMARY KEY</td></tr>
+<tr><td>FOREIGN KEY</td><td>Links two tables</td><td>FOREIGN KEY (dept_id) REFERENCES Dept(dept_id)</td></tr>
+<tr><td>CHECK</td><td>Value must meet condition</td><td>age INT CHECK (age &gt;= 18)</td></tr>
+<tr><td>DEFAULT</td><td>Auto-fills when no value given</td><td>status DEFAULT 'Active'</td></tr></table>
+<pre>CREATE TABLE Student (
+  student_id  INT          PRIMARY KEY,
+  name        VARCHAR(100) NOT NULL,
+  email       VARCHAR(100) UNIQUE,
+  cgpa        DECIMAL(3,2) CHECK (cgpa BETWEEN 0.0 AND 10.0),
+  branch      VARCHAR(50)  DEFAULT 'CSE',
+  dept_id     INT,
+  FOREIGN KEY (dept_id) REFERENCES Department(dept_id)
+);</pre>
+
+<h2>4. ER Models</h2>
+<p>An <b>Entity-Relationship (ER) Model</b> is a conceptual data model describing database structure. Introduced by <b>Peter Chen in 1976</b>.</p>
+<h3>ER Diagram Symbols</h3>
+<table><tr><th>Symbol</th><th>Represents</th><th>Example</th></tr>
+<tr><td>Rectangle</td><td>Entity</td><td>Student, Employee</td></tr>
+<tr><td>Ellipse</td><td>Attribute</td><td>Name, Age, ID</td></tr>
+<tr><td>Diamond</td><td>Relationship</td><td>Enrolls, Works_In</td></tr>
+<tr><td>Double Rectangle</td><td>Weak Entity</td><td>Dependent</td></tr>
+<tr><td>Double Ellipse</td><td>Multivalued Attribute</td><td>Phone numbers</td></tr>
+<tr><td>Dashed Ellipse</td><td>Derived Attribute</td><td>Age from DOB</td></tr>
+<tr><td>Underlined</td><td>Key Attribute</td><td>Student_ID</td></tr></table>
+<h3>Types of Attributes</h3>
+<ul>
+<li><b>Simple</b> &mdash; Cannot be divided. e.g., Age</li>
+<li><b>Composite</b> &mdash; Can be divided. e.g., Name &rarr; First + Last</li>
+<li><b>Multivalued</b> &mdash; Multiple values. e.g., Phone Numbers</li>
+<li><b>Derived</b> &mdash; From another attribute. e.g., Age from DOB</li>
+<li><b>Key</b> &mdash; Uniquely identifies entity. e.g., Student_ID</li>
+</ul>
+<h3>Cardinality</h3>
+<table><tr><th>Type</th><th>Notation</th><th>Example</th></tr>
+<tr><td>One-to-One (1:1)</td><td>1 &mdash; 1</td><td>Person has one Passport</td></tr>
+<tr><td>One-to-Many (1:N)</td><td>1 &mdash; N</td><td>Teacher teaches many Students</td></tr>
+<tr><td>Many-to-Many (M:N)</td><td>M &mdash; N</td><td>Students enroll in many Courses</td></tr></table>
+<p><b>Weak Entity:</b> Cannot be uniquely identified by its own attributes. Depends on a strong entity. Example: Dependent depends on Employee. Identified by (employee_id + dependent_name).</p>
+
+<h2>5. Banking Database Architecture</h2>
+<p>Banking databases require strict <b>ACID properties</b>: Atomicity, Consistency, Isolation, Durability.</p>
+<h3>ACID Properties</h3>
+<ul>
+<li><b>Atomicity:</b> Transaction completes fully or not at all. Fund transfer: debit + credit both happen or neither does.</li>
+<li><b>Consistency:</b> Total money remains constant before and after transfer.</li>
+<li><b>Isolation:</b> Simultaneous transactions do not interfere with each other.</li>
+<li><b>Durability:</b> Committed transaction persists even after system crash.</li>
+</ul>
+<h3>Core Banking Tables</h3>
+<pre>CREATE TABLE Branch (branch_id INT PRIMARY KEY, branch_name VARCHAR(50), city VARCHAR(50), assets DECIMAL(15,2));
+CREATE TABLE Customer (cust_id INT PRIMARY KEY, name VARCHAR(100), address VARCHAR(200), phone VARCHAR(15));
+CREATE TABLE Account (acc_no INT PRIMARY KEY, cust_id INT REFERENCES Customer(cust_id), branch_id INT REFERENCES Branch(branch_id), balance DECIMAL(12,2) CHECK (balance &gt;= 0), acc_type VARCHAR(20) DEFAULT 'Savings');
+CREATE TABLE Loan (loan_id INT PRIMARY KEY, cust_id INT REFERENCES Customer(cust_id), branch_id INT REFERENCES Branch(branch_id), amount DECIMAL(12,2), loan_type VARCHAR(20));
+CREATE TABLE Transaction (txn_id INT PRIMARY KEY, acc_no INT REFERENCES Account(acc_no), txn_date DATE DEFAULT CURRENT_DATE, amount DECIMAL(12,2), txn_type VARCHAR(10) CHECK (txn_type IN ('CREDIT','DEBIT')));</pre>
+
+<h2>6. DDL &mdash; Data Definition Language</h2>
+<p>DDL defines and modifies the <b>schema/structure</b> of the database. Changes are <b>auto-committed</b> and cannot be rolled back.</p>
+<h3>CREATE</h3>
+<pre>CREATE DATABASE CollegeDB;
+CREATE TABLE Student (student_id INT PRIMARY KEY, name VARCHAR(100) NOT NULL, dob DATE, branch VARCHAR(50) DEFAULT 'CSE', cgpa DECIMAL(3,2) CHECK (cgpa BETWEEN 0.0 AND 10.0), email VARCHAR(100) UNIQUE);</pre>
+<h3>ALTER</h3>
+<pre>ALTER TABLE Student ADD phone VARCHAR(15);
+ALTER TABLE Student MODIFY cgpa DECIMAL(4,2);
+ALTER TABLE Student DROP COLUMN dob;
+ALTER TABLE Student RENAME COLUMN phone TO mobile;</pre>
+<h3>DROP and TRUNCATE</h3>
+<pre>DROP TABLE Student;       -- deletes table + all data permanently
+DROP DATABASE CollegeDB;  -- deletes entire database
+TRUNCATE TABLE Student;   -- removes all rows, keeps structure</pre>
+<h3>DDL vs DML</h3>
+<table><tr><th>Feature</th><th>DDL</th><th>DML</th></tr>
+<tr><td>Works on</td><td>Schema/Structure</td><td>Data/Rows</td></tr>
+<tr><td>Auto-commit</td><td>Yes</td><td>No</td></tr>
+<tr><td>Rollback</td><td>Not possible</td><td>Possible</td></tr>
+<tr><td>Commands</td><td>CREATE, ALTER, DROP</td><td>INSERT, UPDATE, DELETE</td></tr></table>
+
+<h2>7. DML &mdash; Data Manipulation Language</h2>
+<p>DML inserts, updates, deletes, and retrieves data. Operations are <b>not auto-committed</b> and can be rolled back.</p>
+<h3>INSERT</h3>
+<pre>INSERT INTO Student VALUES (101, 'Ravi Kumar', '2002-05-10', 'CSE', 8.5, 'ravi@email.com');
+INSERT INTO Student (student_id, name, branch) VALUES (102, 'Priya', 'ECE');
+INSERT INTO Student VALUES (103,'Arjun','2001-11-20','MECH',7.8,'arjun@email.com'),(104,'Sneha','2002-03-15','CSE',9.1,'sneha@email.com');</pre>
+<h3>SELECT</h3>
+<pre>SELECT * FROM Student;
+SELECT name, cgpa FROM Student WHERE branch = 'CSE' AND cgpa &gt; 8.0;
+SELECT name, cgpa FROM Student ORDER BY cgpa DESC;
+SELECT branch, AVG(cgpa) AS avg_cgpa FROM Student GROUP BY branch HAVING AVG(cgpa) &gt; 7.5;
+SELECT s.name, c.course_name FROM Student s JOIN Enrollment e ON s.student_id = e.student_id JOIN Course c ON e.course_id = c.course_id;
+SELECT name FROM Student WHERE cgpa &gt; (SELECT AVG(cgpa) FROM Student);</pre>
+<h3>UPDATE and DELETE</h3>
+<pre>UPDATE Student SET cgpa = 9.0 WHERE student_id = 101;
+UPDATE Student SET branch = 'IT' WHERE branch = 'CSE' AND cgpa &lt; 6.0;
+DELETE FROM Student WHERE student_id = 101;
+DELETE FROM Student WHERE cgpa &lt; 5.0;</pre>
+<h3>Important Clauses</h3>
+<table><tr><th>Clause</th><th>Purpose</th><th>Example</th></tr>
+<tr><td>WHERE</td><td>Filter rows</td><td>WHERE age &gt; 20</td></tr>
+<tr><td>ORDER BY</td><td>Sort results</td><td>ORDER BY name ASC</td></tr>
+<tr><td>GROUP BY</td><td>Group rows</td><td>GROUP BY dept</td></tr>
+<tr><td>HAVING</td><td>Filter groups</td><td>HAVING COUNT(*) &gt; 5</td></tr>
+<tr><td>DISTINCT</td><td>Remove duplicates</td><td>SELECT DISTINCT city</td></tr>
+<tr><td>LIKE</td><td>Pattern matching</td><td>WHERE name LIKE 'A%'</td></tr>
+<tr><td>BETWEEN</td><td>Range check</td><td>WHERE age BETWEEN 18 AND 25</td></tr>
+<tr><td>IN</td><td>List check</td><td>WHERE dept IN ('CSE','IT')</td></tr></table>
+
+<h2>8. DCL &mdash; Data Control Language</h2>
+<p>DCL controls <b>access and permissions</b> on database objects.</p>
+<h3>GRANT</h3>
+<pre>GRANT SELECT ON Student TO user1;
+GRANT SELECT, INSERT, UPDATE ON Student TO user2;
+GRANT ALL PRIVILEGES ON Student TO admin_user;
+GRANT SELECT ON Student TO user3 WITH GRANT OPTION;</pre>
+<h3>REVOKE</h3>
+<pre>REVOKE SELECT ON Student FROM user1;
+REVOKE ALL PRIVILEGES ON Student FROM user2;</pre>
+<h3>Privileges</h3>
+<table><tr><th>Privilege</th><th>Description</th></tr>
+<tr><td>SELECT</td><td>Read/query data</td></tr>
+<tr><td>INSERT</td><td>Add new rows</td></tr>
+<tr><td>UPDATE</td><td>Modify existing data</td></tr>
+<tr><td>DELETE</td><td>Remove rows</td></tr>
+<tr><td>CREATE</td><td>Create tables/objects</td></tr>
+<tr><td>DROP</td><td>Delete tables/objects</td></tr>
+<tr><td>ALL</td><td>All privileges combined</td></tr></table>
+
+<h2>9. SQL Commands &mdash; Complete Reference</h2>
+<h3>TCL &mdash; Transaction Control Language</h3>
+<pre>BEGIN;
+  UPDATE Account SET balance = balance - 5000 WHERE acc_no = 1001;
+  UPDATE Account SET balance = balance + 5000 WHERE acc_no = 1002;
+COMMIT;
+
+BEGIN;
+  DELETE FROM Student WHERE cgpa &lt; 4.0;
+ROLLBACK;
+
+BEGIN;
+  INSERT INTO Student VALUES (201,'Test','2000-01-01','CSE',7.0,'t@e.com');
+  SAVEPOINT sp1;
+  UPDATE Student SET cgpa = 0 WHERE student_id = 201;
+  ROLLBACK TO sp1;
+COMMIT;</pre>
+<h3>Joins</h3>
+<pre>-- INNER JOIN
+SELECT s.name, c.course_name FROM Student s INNER JOIN Course c ON s.student_id = c.student_id;
+-- LEFT JOIN
+SELECT s.name, e.grade FROM Student s LEFT JOIN Enrollment e ON s.student_id = e.student_id;
+-- RIGHT JOIN
+SELECT e.grade, c.course_name FROM Enrollment e RIGHT JOIN Course c ON e.course_id = c.course_id;
+-- SELF JOIN
+SELECT A.name AS Employee, B.name AS Manager FROM Employee A, Employee B WHERE A.manager_id = B.emp_id;</pre>
+<h3>Aggregate Functions</h3>
+<pre>SELECT COUNT(*) AS total FROM Student;
+SELECT SUM(salary) AS total FROM Employee;
+SELECT AVG(cgpa) AS avg FROM Student;
+SELECT MAX(cgpa) AS highest FROM Student;
+SELECT MIN(salary) AS lowest FROM Employee;
+SELECT branch, COUNT(*) AS count FROM Student GROUP BY branch;</pre>
+<h3>Views and Indexes</h3>
+<pre>CREATE VIEW TopStudents AS SELECT student_id, name, cgpa FROM Student WHERE cgpa &gt;= 8.5;
+SELECT * FROM TopStudents;
+DROP VIEW TopStudents;
+CREATE INDEX idx_name ON Student(name);
+CREATE UNIQUE INDEX idx_email ON Student(email);
+DROP INDEX idx_name;</pre>
+<h3>Complete Command Summary</h3>
+<table><tr><th>Category</th><th>Command</th><th>Purpose</th></tr>
+<tr><td>DDL</td><td>CREATE</td><td>Create table/database/view</td></tr>
+<tr><td>DDL</td><td>ALTER</td><td>Modify table structure</td></tr>
+<tr><td>DDL</td><td>DROP</td><td>Delete table/database permanently</td></tr>
+<tr><td>DDL</td><td>TRUNCATE</td><td>Remove all rows, keep structure</td></tr>
+<tr><td>DML</td><td>INSERT</td><td>Add new data rows</td></tr>
+<tr><td>DML</td><td>SELECT</td><td>Query/retrieve data</td></tr>
+<tr><td>DML</td><td>UPDATE</td><td>Modify existing data</td></tr>
+<tr><td>DML</td><td>DELETE</td><td>Remove specific rows</td></tr>
+<tr><td>DCL</td><td>GRANT</td><td>Give privileges to users</td></tr>
+<tr><td>DCL</td><td>REVOKE</td><td>Remove privileges from users</td></tr>
+<tr><td>TCL</td><td>COMMIT</td><td>Save transaction permanently</td></tr>
+<tr><td>TCL</td><td>ROLLBACK</td><td>Undo changes since last commit</td></tr>
+<tr><td>TCL</td><td>SAVEPOINT</td><td>Set checkpoint in transaction</td></tr></table>
+
+<div class="tip"><b>Exam Tips:</b> DDL is auto-committed; DML is not. WHERE filters before grouping; HAVING filters after. DELETE can be rolled back; TRUNCATE cannot. Always mention ACID for banking questions. Practice ER diagram symbols.</div>
+<p class="center" style="color:#9ca3af;font-size:9pt;margin-top:20pt;">B.Tech V Semester &mdash; DBMS Complete Notes</p>
+</body></html>
