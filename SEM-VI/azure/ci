@@ -1,0 +1,37 @@
+jobs:
+  deploy:
+    runs-on: [self-hosted, windows, iis-server]
+    steps:
+      - name: Download artifact from Azure DevOps
+        shell: pwsh
+        env:
+          AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
+        run: |
+          $pair = ":$env:AZURE_DEVOPS_PAT"
+          $bytes = [System.Text.Encoding]::ASCII.GetBytes($pair)
+          $base64 = [System.Convert]::ToBase64String($bytes)
+          $headers = @{ Authorization = "Basic $base64" }
+
+          Invoke-WebRequest -Uri "https://dev.azure.com/ORG/PROJECT/_apis/build/builds/$env:BUILD_ID/artifacts?artifactName=drop&api-version=7.1&`$format=zip" `
+            -Headers $headers -OutFile artifact.zip
+
+          Expand-Archive artifact.zip -DestinationPath .\artifact -Force
+
+      - name: Stop IIS site / app pool
+        shell: pwsh
+        run: |
+          Import-Module WebAdministration
+          Stop-WebAppPool -Name "MyAppPool"
+          Stop-Website -Name "MyApp"
+
+      - name: Deploy files
+        shell: pwsh
+        run: |
+          Copy-Item -Path ".\artifact\*" -Destination "C:\inetpub\wwwroot\MyApp\" -Recurse -Force
+
+      - name: Start IIS site / app pool
+        shell: pwsh
+        run: |
+          Import-Module WebAdministration
+          Start-WebAppPool -Name "MyAppPool"
+          Start-Website -Name "MyApp"
