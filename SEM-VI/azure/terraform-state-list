@@ -1,0 +1,7 @@
+- task: TerraformCLI@2
+    displayName: 'List State'
+    inputs:
+      command: 'state'
+      commandOptions: 'list'
+      workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+      environmentServiceName: '$(serviceConnection)'
