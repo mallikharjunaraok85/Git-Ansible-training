@@ -1,1 +1,17 @@
-Hi
+jobs:
+  deploy:
+    runs-on: windows-latest
+    steps:
+      - name: Azure CLI login not needed, use PAT auth
+        shell: pwsh
+        run: |
+          az extension add --name azure-devops
+          $env:AZURE_DEVOPS_EXT_PAT = "${{ secrets.AZURE_ARTIFACTS_PAT }}"
+          az artifacts universal download `
+            --organization "https://dev.azure.com/<your-org>" `
+            --project "<your-project>" `
+            --scope project `
+            --feed "<your-feed-name>" `
+            --name "<package-name>" `
+            --version "<package-version>" `
+            --path "./downloaded-artifact"
