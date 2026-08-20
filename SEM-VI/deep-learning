@@ -1,0 +1,428 @@
+resource "azurerm_virtual_network" "vnet" {
+  name                = var.name
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  address_space       = [var.address_space]
+ 
+  lifecycle {
+    prevent_destroy = true
+  }
+ 
+  tags = var.tags
+}
+ 
+resource "azurerm_subnet" "subnet" {
+  for_each = var.subnets
+ 
+  name                                          = each.value.name == null ? replace(var.name, "rabo-vnet", "${each.key}-snet") : each.value.name
+  resource_group_name                           = azurerm_virtual_network.vnet.resource_group_name
+  virtual_network_name                          = azurerm_virtual_network.vnet.name
+  address_prefixes                              = [each.value.range]
+  private_endpoint_network_policies             = var.private_endpoint_network_policies
+  private_link_service_network_policies_enabled = each.value.private_link_service_network_policies_enabled
+  service_endpoints                             = ["Microsoft.Storage", "Microsoft.KeyVault", "Microsoft.ServiceBus"]
+ 
+  dynamic "delegation" {
+    for_each = each.value.delegation != null ? [each.value.delegation] : []
+ 
+    content {
+      name = delegation.value.name
+ 
+      service_delegation {
+        name    = delegation.value.service_delegation.name
+        actions = delegation.value.service_delegation.actions
+      }
+    }
+  }
+}
+ 
+resource "azurerm_subnet_route_table_association" "subnet_route_table_association" {
+  for_each       = { for k, v in var.subnets : k => v if v.route_table_allowed }
+  subnet_id      = azurerm_subnet.subnet[each.key].id
+  route_table_id = var.route_table_id
+}
+ 
+resource "azurerm_virtual_network_dns_servers" "rabobank_dns" {
+  virtual_network_id = azurerm_virtual_network.vnet.id
+  dns_servers        = ["10.253.14.71", "10.253.14.72"]
+}
+ 
+resource "azurerm_role_assignment" "vnet_role_assignment" {
+  scope                = azurerm_virtual_network.vnet.id
+  role_definition_name = "Network Contributor"
+  principal_id         = "29efd061-ba66-46b3-8c2c-8149a9813e3a"
+}
+ 
+ 
+========================================================
+resource "azurerm_network_security_group" "nsg" {
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  name                = var.name
+  tags                = var.tags
+}
+ 
+resource "azurerm_network_security_rule" "nsg_rules" {
+  for_each = var.nsg_rules
+ 
+  resource_group_name         = var.resource_group_name
+  network_security_group_name = azurerm_network_security_group.nsg.name
+ 
+  name                         = each.value.name
+  access                       = each.value.access
+  description                  = each.value.description
+  direction                    = each.value.direction
+  priority                     = each.value.priority
+  protocol                     = each.value.protocol
+  source_port_range            = each.value.source_port_range
+  source_port_ranges           = each.value.source_port_ranges
+  source_address_prefix        = each.value.source_address_prefix
+  source_address_prefixes      = each.value.source_address_prefixes
+  destination_port_range       = each.value.destination_port_range
+  destination_port_ranges      = each.value.destination_port_ranges
+  destination_address_prefix   = each.value.destination_address_prefix
+  destination_address_prefixes = each.value.destination_address_prefixes
+}
+ 
+resource "azurerm_subnet_network_security_group_association" "subnet_nsg" {
+  count = var.subnet_id == null ? 0 : 1
+ 
+  network_security_group_id = azurerm_network_security_group.nsg.id
+  subnet_id                 = var.subnet_id
+}
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# ----------------------------------------------------
+# Private Endpoint (without lifecycle ignore)
+# ----------------------------------------------------
+resource "azurerm_private_endpoint" "private_endpoint" {
+  count = var.ignore_manual_connection_state ? 0 : 1
+ 
+  name                = var.name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  subnet_id           = var.subnet_id
+  tags                = var.tags
+ 
+  private_service_connection {
+    name                           = var.name
+    private_connection_resource_id = var.private_service_connection.private_connection_resource_id
+    is_manual_connection           = var.is_manual_connection
+    request_message                = var.is_manual_connection ? var.request_message : null
+    subresource_names              = var.private_service_connection.group_ids
+  }
+ 
+  dynamic "private_dns_zone_group" {
+    for_each = var.private_dns_zone_id != null ? [1] : []
+    content {
+      name                 = "entry-in-private-dns-zone-${var.name}"
+      private_dns_zone_ids = [var.private_dns_zone_id]
+    }
+  }
+}
+ 
+# ----------------------------------------------------
+# Private Endpoint (with lifecycle ignore for manual connections)
+# Created when ignore_manual_connection_state = true
+# Ignores changes to private_service_connection after manual approval.
+# ----------------------------------------------------
+resource "azurerm_private_endpoint" "private_endpoint_manual" {
+  count = var.ignore_manual_connection_state ? 1 : 0
+ 
+  name                = var.name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  subnet_id           = var.subnet_id
+  tags                = var.tags
+ 
+  private_service_connection {
+    name                           = var.name
+    private_connection_resource_id = var.private_service_connection.private_connection_resource_id
+    is_manual_connection           = var.is_manual_connection
+    request_message                = var.is_manual_connection ? var.request_message : null
+    subresource_names              = var.private_service_connection.group_ids
+  }
+ 
+  dynamic "private_dns_zone_group" {
+    for_each = var.private_dns_zone_id != null ? [1] : []
+    content {
+      name                 = "entry-in-private-dns-zone-${var.name}"
+      private_dns_zone_ids = [var.private_dns_zone_id]
+    }
+  }
+ 
+  lifecycle {
+    ignore_changes = [private_service_connection]
+  }
+}
+=======================================================
+ 
+resource "azurerm_private_endpoint" "lza_pvtendpoint_acc" {
+  #depends_on = [azurerm_virtual_network.lza-vnet]
+  for_each            = var.PRIVATE_ENDPOINT_ACC
+  name                = each.value.name                                                                                                                                                                                             #"example-endpoint"
+  location            = each.value.location                                                                                                                                                                                         #each.value.data.azurerm_resource_group.example.location
+  resource_group_name = each.value.rg_name                                                                                                                                                                                          #data.azurerm_resource_group.example.name
+  subnet_id           = "/subscriptions/50b525f0-a52d-4146-ace1-c4d6e2f25057/resourceGroups/az-lena-accvnet-rg-01-a/providers/Microsoft.Network/virtualNetworks/az-lena-sap-we-rabo-vnet-01-a/subnets/az-lena-sap-we-app-snet-01-a" #lookup(zipmap(var.subnets, flatten(var.SUBNET_ID_WITH_NAME)), each.value.subnetname_values, "what?")#data.azurerm_subnet.subnet.id
+ 
+  lifecycle {
+    prevent_destroy = true
+  }
+ 
+  tags = var.tags
+ 
+  private_service_connection {
+    name                              = each.value.name                              #"example-privateserviceconnection"
+    private_connection_resource_alias = each.value.private_connection_resource_alias #"example-privatelinkservice.d20286c8-4ea5-11eb-9584-8f53157226c6.centralus.azure.privatelinkservice"
+    is_manual_connection              = true
+    request_message                   = each.value.request_message
+  }
+}
+ 
+ 
+resource "azurerm_route_table" "lza_route" {
+  for_each            = var.ROUTE_TABLE
+  name                = each.value.name
+  location            = each.value.route_rg_loc
+  resource_group_name = each.value.route_rg_name
+ 
+  route {
+    name                   = each.value.route_name
+    address_prefix         = each.value.address_prefix
+    next_hop_type          = each.value.next_hop_type
+    next_hop_in_ip_address = each.value.next_hop_in_ip_address
+  }
+  lifecycle {
+    prevent_destroy = true
+  }
+  tags = var.tags
+}
+ 
+resource "azurerm_subnet_route_table_association" "lza_route-associate" {
+  for_each       = var.ROUTE_TABLE_ASSOCIATION
+  subnet_id      = var.subnets_map[each.value.subnetname_values].id
+  route_table_id = lookup({ for k, lza_route in azurerm_route_table.lza_route : k => lza_route.id }, each.value.name, "what?")
+}
+ 
+ 
+variable "name" {
+  description = "The name of the virtual network"
+  type        = string
+}
+ 
+variable "resource_group_name" {
+  description = "The name of the resource group"
+  type        = string
+}
+ 
+variable "location" {
+  description = "The location/region where the virtual network is created"
+  type        = string
+  default     = "West Europe"
+}
+ 
+variable "address_space" {
+  description = "The address space that is used by the virtual network."
+  type        = string
+ 
+  validation {
+    condition     = can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}/24$", var.address_space))
+    error_message = "The 'address_space' must be a valid CIDR block with a /24 subnet mask, like '192.168.0.0/24'. If you want to use a different adress space it means that SAP LENA is no longer bound to Express Route connected vnets and you need to rewrite this module."
+  }
+}
+ 
+variable "subnets" {
+  description = "values for the subnets to create in the virtual network. The keys are the names of the subnets and the values are the CIDR blocks and ."
+  type = map(object({
+    range                                         = string
+    private_link_service_network_policies_enabled = bool
+    name                                          = optional(string, null) # Optional name for the subnet, if not provided it will be derived from the key
+    route_table_allowed                           = optional(bool, true)   # Optional flag to allow route table association, default is true
+    delegation = optional(object(
+      {
+        name = string
+        service_delegation = object(
+          {
+            name    = string
+            actions = list(string) # Optional actions for the delegation, e.g. ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+        })
+    }), null)
+  }))
+}
+ 
+variable "tags" {
+  description = "A mapping of tags to assign to the resource."
+  type        = map(string)
+  default     = {}
+}
+ 
+variable "private_endpoint_network_policies" {
+  description = "Whether network policies are enabled for the private endpoint."
+  type        = string
+  default     = null
+}
+ 
+variable "route_table_id" {
+  description = "The ID of the route table to associate with the subnets."
+  type        = string
+}
+ 
+----------------------------------------------------------
+variable "location" {
+  description = "The Azure region where the Network Security Group will be created." // -----------------------------------------------------------------------------
+  default     = "West Europe"
+  type        = string
+}
+ 
+variable "resource_group_name" {
+  description = "The name of the resource group in which to create the Network Security Group."
+  type        = string
+}
+ 
+variable "name" {
+  description = "The name of the Network Security Group."
+  type        = string
+}
+ 
+variable "tags" {
+  description = "A map of tags to assign to the Network Security Group."
+  type        = map(string)
+}
+ 
+variable "nsg_rules" {
+  description = "Map of Network Security Group rules to create. Each rule should include the following attributes: name, access, description, direction, priority, protocol, source_port_range, source_port_ranges, source_address_prefix, source_address_prefixes, destination_port_range, destination_port_ranges, destination_address_prefix, and destination_address_prefixes."
+ 
+  type = map(object({
+    name                         = string
+    access                       = string
+    description                  = optional(string)
+    direction                    = string
+    priority                     = number
+    protocol                     = string
+    source_port_range            = optional(string)
+    source_port_ranges           = optional(list(string))
+    source_address_prefix        = optional(string)
+    source_address_prefixes      = optional(list(string))
+    destination_port_range       = optional(string)
+    destination_port_ranges      = optional(list(string))
+    destination_address_prefix   = optional(string)
+    destination_address_prefixes = optional(list(string))
+  }))
+  default = {}
+}
+ 
+variable "subnet_id" {
+  description = "The ID of the subnet to associate with the Network Security Group. Leave null to create an NSG without subnet association."
+  type        = string
+  default     = null
+  nullable    = true
+}
+-------------------------------------------------------
+variable "name" {
+  description = "The name of the private endpoint."
+  type        = string
+}
+ 
+variable "resource_group_name" {
+  description = "The name of the resource group in which to create the private endpoint."
+  type        = string
+}
+ 
+variable "location" {
+  description = "The location/region where the private endpoint will be created."
+  type        = string
+  default     = "West Europe"
+}
+ 
+variable "subnet_id" {
+  description = "The ID of the subnet within which the private endpoint will be created."
+  type        = string
+}
+ 
+variable "private_service_connection" {
+  description = "A private service connection configuration."
+  type = object({
+    private_connection_resource_id = string
+    group_ids                      = list(string)
+  })
+}
+ 
+variable "is_manual_connection" {
+  description = "Whether the private endpoint is a manual connection."
+  type        = bool
+  default     = false
+}
+ 
+variable "request_message" {
+  description = "A message to include in the request."
+  type        = string
+  default     = "Requesting connection to private link service from SAP LENA Express route connected vnet."
+}
+ 
+variable "tags" {
+  description = "A map of tags to assign to the resource."
+  type        = map(string)
+  default     = {}
+}
+ 
+variable "private_dns_zone_id" {
+  description = "The ID of the private DNS zones to associate with the private endpoint. Set to null to skip DNS integration."
+  type        = string
+  default     = null
+}
+ 
+variable "ignore_manual_connection_state" {
+  description = "Set to true to ignore changes to private_service_connection after manual approval (useful for manual approval scenarios)."
+  type        = bool
+  default     = false
+}
+----------------------------------------------------------------------------
+variable "PRIVATE_ENDPOINT_ACC" {
+  type = map(object({
+    name     = string
+    location = string
+    rg_name  = string
+    #name = string
+    private_connection_resource_alias = string
+    is_manual_connection              = bool
+    request_message                   = string
+ 
+  }))
+}
+ 
+variable "tags" {
+  type    = map(string)
+  default = {}
+}
+----------------------------------------------------------------------
+variable "ROUTE_TABLE" {
+  type = map(object({
+    name                   = string
+    route_rg_name          = string
+    route_rg_loc           = string
+    route_name             = string
+    address_prefix         = string
+    next_hop_type          = string
+    next_hop_in_ip_address = string
+  }))
+}
+ 
+variable "subnets_map" {
+  type = map(object({
+    name = string
+    id   = string
+  }))
+}
+ 
+variable "ROUTE_TABLE_ASSOCIATION" {
+  type = map(object({
+    name              = string
+    subnetname_values = string
+  }))
+}
+ 
+variable "tags" {
+  type    = map(string)
+  default = {}
+}
+ 
+ 
