@@ -1,17 +1,23 @@
-jobs:
-  deploy:
-    runs-on: windows-latest
-    steps:
-      - name: Azure CLI login not needed, use PAT auth
-        shell: pwsh
-        run: |
-          az extension add --name azure-devops
-          $env:AZURE_DEVOPS_EXT_PAT = "${{ secrets.AZURE_ARTIFACTS_PAT }}"
-          az artifacts universal download `
-            --organization "https://dev.azure.com/<your-org>" `
-            --project "<your-project>" `
-            --scope project `
-            --feed "<your-feed-name>" `
-            --name "<package-name>" `
-            --version "<package-version>" `
-            --path "./downloaded-artifact"
+Please find the questions to prepare :
+
+What is an Ansible Playbook?
+What is an Inventory in Ansible?
+What does "idempotency" mean in Ansible?
+What are Ansible Roles?
+How do you store or encrypt sensitive data in Ansible?
+What is the difference between the command and shell modules?
+What are Handlers in Ansible?
+What is the purpose of Ansible Tower/AWX?
+How do you test or validate Ansible Playbooks?
+ 
+What are the main services offered by Azure DevOps?
+What is the difference between Build and Release pipelines?
+What is a YAML Pipeline in Azure DevOps?
+How do you manage secrets in Azure DevOps pipelines?
+What is a Service Connection in Azure DevOps?
+What branching strategy have you used in Azure Repos?
+What is an Azure DevOps Agent?
+How do you enable approvals in Azure DevOps pipelines?
+What Azure resources have you deployed using Azure DevOps?
+What external tools have you integrated with Azure DevOps?
+ 
