@@ -1,0 +1,6 @@
+Assignment Questions of Computer Networks:
+1.	Draw and explain the seven-layer ISO/OSI reference model. State the major functions of each layer. 
+2.	Explain Go-Back-N ARQ with a suitable example. Describe its operation when a frame is lost or damaged. 
+3.	Explain Distance Vector Routing with a suitable example. Discuss the count-to-infinity problem and its solutions. 
+4.	Explain TCP connection establishment using the three-way handshake with a suitable sequence diagram. 
+5.	Explain the working of a web application using DNS, TCP and HTTP, starting from entering a URL until the webpage is displayed.
