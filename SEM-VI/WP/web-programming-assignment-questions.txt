@@ -1,0 +1,27 @@
+
+1) Define document type definition & give an example
+2) Demonstrate XML Style Sheets with an example
+3) What are the security concerns in java script
+4) Elaborate pre–AJAX Java Script communication techniques
+5) Explain how to track sessions using two best methods
+6) Give a full-fledged example using MERN stack.
+7) What are the built-in functions in PHP and explain pattern match
+8) Illustrate database access with PHP.
+9) Differentiate traditional database with mongo database
+10) Describe how REACT JS is better than traditional programming
+11) Explain Session Tracking Techniques
+    1. cookies
+    2. Hidden form field
+    3. URL Rewriting
+    4. HTTP Seeion 
+12) Different methods for session tracking and explain one of the method with examples
+13) PHP database access? examples
+14) Servlet access with database ? Examples.
+15) Explain html basic tags with examples
+16) Write short notes on lists, forms, tales and frames in html
+17) Discuss CSS types and its applications
+18) Describe the html 5 features and web creation tools
+19) Java script events with examples
+20) BOM and DOM in java scripts
+21) what is http and explain http request and response formats
+22) Java script functions
