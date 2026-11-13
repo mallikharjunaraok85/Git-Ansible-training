@@ -1,0 +1,25 @@
+<html>
+<head>
+<script type="text/javascript">
+function f1()
+{
+	var o=document.getElementById("p1");
+	o.style.color="red";
+}
+function f2()
+{
+	var o=document.getElementById("p1");
+	o.style.color="blue";
+}
+</script>
+</head>
+<body>
+<p id="p1">
+	Click Me
+</p>
+<form>
+<input type=button id="b1" value="RED" onclick=f1() />
+<input type=button id="b2" value="BLUE" onclick=f2() />
+</form>
+</body>
+</html>
